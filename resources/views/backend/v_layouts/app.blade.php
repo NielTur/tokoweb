@@ -178,6 +178,27 @@
                             </ul>
                         </li>
 
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false">
+                                <i class="mdi mdi-cart"></i>
+                                <span class="hide-menu">Pesanan</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('pesanan.proses') }}" class="sidebar-link">
+                                        <i class="mdi mdi-chevron-right"></i>
+                                        <span class="hide-menu">Proses</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('pesanan.selesai') }}" class="sidebar-link">
+                                        <i class="mdi mdi-chevron-right"></i>
+                                        <span class="hide-menu">Selesai</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
 
                     </ul>
                 </nav>

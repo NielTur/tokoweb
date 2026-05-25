@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Contracts\Service\Attribute\Required;
 use Illuminate\Support\Facades\Http;
-use Midtrans\snap;
+use Midtrans\Snap;
 use Midtrans\Config;
 use function PHPUnit\Framework\returnArgument;
 
@@ -140,9 +140,7 @@ class OrderController extends Controller
 
     public function checkout()
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
-        ;
-        ;
+        $customer = Customer::where('user_id', Auth::id())->first();;;
         $order = Order::where('customer_id', $customer->id)->where('status', 'pending')->first();
         // kurangi stok
         if ($order) {
@@ -164,9 +162,7 @@ class OrderController extends Controller
 
     public function orderHistory()
     {
-        $customer = Customer::where('user_id', Auth::id())->first();
-        ;
-        ;
+        $customer = Customer::where('user_id', Auth::id())->first();;;
         //$order = Order::where('customer_id', $customer->id)->where('status', 'completed')->get();
         $statuses = ['paid', 'Kirim', 'Selesai'];
         $orders = Order::where('customer_id', $customer->id)
@@ -215,8 +211,8 @@ class OrderController extends Controller
 
     public function selectPayment()
     {
-        $customer = Auth::user();
-        $order = Order::where('customer_id', $customer->customer->id)->where('status', 'pending')->first();
+        $customer = Customer::where('user_id', Auth::id())->first();
+        $order = Order::where('customer_id', $customer->id)->where('status', 'pending')->first();
         if ($order) {
             $order->load('orderItems.produk');
         }
@@ -240,10 +236,10 @@ class OrderController extends Controller
         // Generate unique order_id
         $orderId = $order->id . '-' . time();
 
-        $oarams = [
+        $params = [
             'transaction_details' => [
                 'order_id' => $orderId,
-                'groos_amount' => (int) $grossAmount, // Pastikasn gross_aount adalah integer 
+                'gross_amount' => (int) $grossAmount, // Pastikasn gross_aount adalah integer 
             ],
             'customer_details' => [
                 'first_name' => $customer->nama,
@@ -378,28 +374,35 @@ class OrderController extends Controller
     }
 
 
-    public function updateongkir(Request $request)
+    public function updateOngkir(Request $request)
     {
         $customer = Customer::where('user_id', Auth::id())->first();
-        $order = Order::where('customer_id', $customer->id)->where('status', 'pending')->first();
+        $order = Order::where('customer_id', $customer->id)
+            ->where('status', 'pending')
+            ->first();
+
+        $kota_asal = $request->input('kota_asal');
+        $kota_tujuan = $request->input('kota_tujuan');
 
         if ($order) {
-            $order->update([
-                'kurir' => $request->input('kurir'),
-                'layanan_ongkir' => $request->input('layanan_ongkir'),
-                'biaya_ongkir' => $request->input('biaya_ongkir'),
-                'estimasi_ongkir' => $request->input('estimasi_ongkir'),
-                'total_berat' => $request->input('total_berat'),
-                'alamat' => $request->input('alamat') . ', ' . $request->input('city_name') . ', ' . $request->input('province_name'),
-                'pos' => $request->input('pos'),
-            ]);
+            // Simpan data ongkir ke dalam order
+            $order->kurir           = $request->input('kurir');
+            $order->layanan_ongkir  = $request->input('layanan_ongkir');
+            $order->biaya_ongkir    = $request->input('biaya_ongkir');
+            $order->estimasi_ongkir = $request->input('estimasi_ongkir');
+            $order->total_berat     = $request->input('total_berat');
+            $order->alamat          = $request->input('alamat') . ', ' . $request->input('city_name') . ', ' . $request->input('province_name');
+            $order->pos             = $request->input('pos');
+            $order->save();
 
-            return redirect()->route('order.selectpayment');
+            // Simpan ke session flash agar bisa diakses di halaman tujuan
+            return redirect()->route('order.selectpayment')
+                ->with('kota_asal', $kota_asal)
+                ->with('kota_tujuan', $kota_tujuan);
         }
 
         return back()->with('error', 'Gagal menyimpan data ongkir');
     }
-
 
 
     // --- RAJAONGKIR API WRAPPERS ---

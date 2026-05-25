@@ -80,6 +80,12 @@ Route::middleware('is.customer')->group(function () {
     Route::post('cart/update/{id}', [OrderController::class, 'updateCart'])->name('order.updateCart');
     Route::post('remove-cart/{id}', [OrderController::class, 'removeCart'])->name('order.remove');
     // Route::post('remove/{id}', [OrderController::class, 'removeFromCart'])->name('order.remove');    // Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
+
+    // rajaongkir
+    Route::post('select-shipping', [OrderController::class, 'selectShipping'])->name('order.selectShipping');
+    Route::post('update-ongkir', [OrderController::class, 'updateOngkir'])->name('order.update-ongkir');
+    // pembayaran
+    Route::get('select-payment', [OrderController::class, 'selectPayment'])->name('order.selectpayment');
 });
 
 // API RAJAONGKIR
