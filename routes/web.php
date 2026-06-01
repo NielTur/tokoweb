@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Models\Order;
 use Illuminate\Auth\Events\Logout;
 use App\Http\Controllers\RajaOngkirController;
+use App\Http\Controllers\Backend\PesananAdminController;
 
 Route::get('/', function () {
     // return view('welcome');
@@ -49,6 +50,14 @@ Route::get('backend/pesanan/detail/{id}', [OrderController::class, 'statusDetail
 Route::post('backend/pesanan/update/{id}', [OrderController::class, 'statusUpdate'])->name('pesanan.update')->middleware('auth');
 
 
+Route::group(['middleware' => 'auth'], function () {
+    // Route Admin untuk mengelola pesanan
+    Route::get('backend/pesanan', [PesananAdminController::class, 'index'])->name('backend.pesanan.index');
+    Route::get('backend/pesanan/{id}', [PesananAdminController::class, 'show'])->name('backend.pesanan.show');
+    Route::post('backend/pesanan/{id}/update-status', [PesananAdminController::class, 'updateStatus'])->name('backend.pesanan.updateStatus');
+});
+
+
 // Frontend
 Route::get('/beranda', [BerandaController::class, 'index'])->name('beranda');
 Route::get('/produk/detail/{id}', [ProdukController::class, 'detail'])->name('produk.detail');
@@ -67,25 +76,22 @@ Route::resource('backend/customer', CustomerController::class, ['as' => 'backend
 
 // Group route untuk customer
 Route::middleware('is.customer')->group(function () {
-
     // Route untuk menampilkan halaman akun customer
     Route::get('/customer/akun/{id}', [CustomerController::class, 'akun'])->name('customer.akun');
-
     // Route untuk mengupdate data akun customer
     Route::put('/customer/updateakun/{id}', [CustomerController::class, 'updateAkun'])->name('customer.updateakun');
-
-    // Route untuk keranjang belanja
-    Route::post('add-to-cart/{id}', [OrderController::class, 'addToCart'])->name('order.addToCart');
+    // Route untuk menambahkan produk ke keranjang
     Route::get('cart', [OrderController::class, 'viewCart'])->name('order.cart');
+    Route::post('add-to-cart/{id}', [OrderController::class, 'addToCart'])->name('order.addToCart');
     Route::post('cart/update/{id}', [OrderController::class, 'updateCart'])->name('order.updateCart');
-    Route::post('remove-cart/{id}', [OrderController::class, 'removeCart'])->name('order.remove');
-    // Route::post('remove/{id}', [OrderController::class, 'removeFromCart'])->name('order.remove');    // Route::post('/order/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
-
+    Route::post('remove/{id}', [OrderController::class, 'removeFromCart'])->name('order.remove');
     // rajaongkir
     Route::post('select-shipping', [OrderController::class, 'selectShipping'])->name('order.selectShipping');
     Route::post('update-ongkir', [OrderController::class, 'updateOngkir'])->name('order.update-ongkir');
     // pembayaran
     Route::get('select-payment', [OrderController::class, 'selectPayment'])->name('order.selectpayment');
+    Route::post('order/complete', [OrderController::class, 'complete'])->name('order.complete');
+    Route::get('history', [OrderController::class, 'orderHistory'])->name('order.history');
 });
 
 // API RAJAONGKIR
