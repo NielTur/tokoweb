@@ -27,16 +27,15 @@
     <!-- Font Awesome Icon -->
     <link rel="stylesheet" href="{{ asset('frontend/css/font-awesome.min.css') }}">
 
-    <!-- Custom stlylesheet -->
+    <!-- Custom stylesheet -->
     <link type="text/css" rel="stylesheet" href="{{ asset('frontend/css/style.css') }}">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-		  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-		  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
-
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 </head>
 
 <body>
@@ -63,11 +62,8 @@
                         </a>
                     </div>
                     <!-- /Logo -->
-
-                    <!-- Search -->
-
-                    <!-- /Search -->
                 </div>
+
                 <div class="pull-right">
                     <ul class="header-btns">
                         <!-- Cart -->
@@ -91,18 +87,25 @@
                                 <strong class="text-uppercase">{{ Auth::user()->nama }}<i class="fa fa-caret-down"></i></strong>
                             </a>
                             <ul class="custom-menu">
-                                <li><a href="{{ route('customer.akun', ['id' => Auth::user()->id]) }}"><i class="fa fa-user-o"></i> Akun Saya</a></li>
-                                <li><a href="#"><i class="fa fa-check"></i> History</a></li>
+                                <li>
+                                    <a href="{{ route('customer.akun', ['id' => Auth::user()->id]) }}">
+                                        <i class="fa fa-user-o"></i> Akun Saya
+                                    </a>
+                                </li>
+                                <li><a href="{{ route('order.history') }}"><i class="fa fa-check"></i> History</a></li>
                                 <li>
                                     <a href="#" onclick="event.preventDefault(); document.getElementById('keluar-app').submit();">
                                         <i class="fa fa-power-off"></i> Keluar
                                     </a>
+                                    <!-- form keluar app -->
                                     <form id="keluar-app" action="{{ route('customer.logout') }}" method="POST" class="d-none">
                                         @csrf
                                     </form>
+                                    <!-- /form keluar app -->
                                 </li>
                             </ul>
                         </li>
+                        <!-- /Account -->
                         @else
                         <!-- Belum login -->
                         <li class="header-account dropdown default-dropdown">
@@ -115,19 +118,18 @@
                             <a href="{{ route('auth.redirect') }}" class="text-uppercase">Login</a>
                         </li>
                         @endif
-                        <!-- /Account -->
 
-                        <!-- Mobile nav toggle-->
+                        <!-- Mobile nav toggle -->
                         <li class="nav-toggle">
                             <button class="nav-toggle-btn main-btn icon-btn"><i class="fa fa-bars"></i></button>
                         </li>
-                        <!-- / Mobile nav toggle -->
+                        <!-- /Mobile nav toggle -->
                     </ul>
                 </div>
             </div>
-            <!-- header -->
+            <!-- /header -->
         </div>
-        <!-- container -->
+        <!-- /container -->
     </header>
     <!-- /HEADER -->
 
@@ -139,6 +141,7 @@
                 @php
                 $kategori = DB::table('kategori')->orderBy('nama_kategori', 'asc')->get();
                 @endphp
+
                 @if (request()->segment(1) == '' || request()->segment(1) == 'beranda')
                 <!-- category nav -->
                 <div class="category-nav">
@@ -148,8 +151,8 @@
                         <li><a href="{{ route('produk.kategori', $row->id) }}">{{ $row->nama_kategori }}</a></li>
                         @endforeach
                     </ul>
-
                 </div>
+                <!-- /category nav -->
                 @else
                 <div class="category-nav show-on-click">
                     <span class="category-header">Kategori <i class="fa fa-list"></i></span>
@@ -159,7 +162,6 @@
                         @endforeach
                     </ul>
                 </div>
-                <!-- /category nav -->
                 @endif
 
                 <!-- menu nav -->
@@ -172,13 +174,14 @@
                         <li><a href="#">Hubungi Kami</a></li>
                     </ul>
                 </div>
-                <!-- menu nav -->
+                <!-- /menu nav -->
             </div>
         </div>
         <!-- /container -->
     </div>
     <!-- /NAVIGATION -->
-    @if (request()->segment(1)=='' || request()->segment(1) == 'beranda')
+
+    @if (request()->segment(1) == '' || request()->segment(1) == 'beranda')
     <!-- HOME -->
     <div id="home">
         <!-- container -->
@@ -226,6 +229,7 @@
     </div>
     <!-- /HOME -->
     @endif
+
     <!-- section -->
     <div class="section">
         <!-- container -->
@@ -276,6 +280,7 @@
                         <!-- /widget product -->
                     </div>
                     <!-- /aside widget -->
+
                     <!-- aside widget -->
                     <div class="aside">
                         <h3 class="aside-title">Filter Kategori</h3>
@@ -291,15 +296,9 @@
 
                 <!-- MAIN -->
                 <div id="main" class="col-md-9">
-                    <!-- store top filter -->
-                    <!-- /store top filter -->
-
-                    <!--@yieldAwal -->
+                    <!-- @yieldAwal -->
                     @yield('content')
-                    <!--@yieldAkhir -->
-
-                    <!-- store bottom filter -->
-                    <!-- /store bottom filter -->
+                    <!-- @yieldAkhir -->
                 </div>
                 <!-- /MAIN -->
             </div>
@@ -381,7 +380,7 @@
                             <div class="form-group">
                                 <input class="input" placeholder="Enter Email Address">
                             </div>
-                            <button class="primary-btn">Join Newslatter</button>
+                            <button class="primary-btn">Join Newsletter</button>
                         </form>
                     </div>
                 </div>
@@ -394,11 +393,11 @@
                 <div class="col-md-8 col-md-offset-2 text-center">
                     <!-- footer copyright -->
                     <div class="footer-copyright">
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                         Copyright &copy;<script>
                             document.write(new Date().getFullYear());
-                        </script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                        </script>
+                        All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i>
+                        by <a href="https://colorlib.com" target="_blank">Colorlib</a>
                     </div>
                     <!-- /footer copyright -->
                 </div>
@@ -416,6 +415,9 @@
     <script src="{{ asset('frontend/js/nouislider.min.js') }}"></script>
     <script src="{{ asset('frontend/js/jquery.zoom.min.js') }}"></script>
     <script src="{{ asset('frontend/js/main.js') }}"></script>
+
+
+    @stack('scripts')
 
 </body>
 

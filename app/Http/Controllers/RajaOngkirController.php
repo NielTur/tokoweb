@@ -7,64 +7,76 @@ use Illuminate\Support\Facades\Http;
 
 class RajaOngkirController extends Controller
 {
-    public function getProvinces()
+    public function getDestination(Request $request)
     {
-        $response = Http::withoutVerifying()
-            ->withHeaders([
-                'key' => env('RAJAONGKIR_API_KEY'),
-                'Accept' => 'application/json'
-            ])
-            ->get('https://rajaongkir.komerce.id/api/v1/destination/province');
+        $search = $request->get('search', ''); // default kosong, bisa diketik oleh user
 
-        return response()->json(json_decode($response->body(), true));
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://rajaongkir.komerce.id/api/v1/destination/domesticdestination?search=' . urlencode($search),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'key: ' . env('RAJAONGKIR_API_KEY'),
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $data = json_decode($response, true);
+
+        return response()->json($data);
     }
 
-    public function getCities(Request $request)
+    public function calculateOngkir(Request $request)
     {
-        $provinceId = $request->input('province_id');
-        $response = Http::withoutVerifying()
-            ->withHeaders([
-                'key' => env('RAJAONGKIR_API_KEY'),
-                'Accept' => 'application/json'
-            ])
-            ->get('https://rajaongkir.komerce.id/api/v1/destination/city/' . $provinceId);
+        $origin = $request->input('origin');
+        $destination = $request->input('destination');
+        $weight = $request->input('weight');
+        $courier = $request->input('courier');
 
-        return response()->json(json_decode($response->body(), true));
-    }
+        $postData = http_build_query([
+            'origin' => $origin,
+            'destination' => $destination,
+            'weight' => $weight,
+            'courier' => $courier,
+            'price' => 'lowest'
+        ]);
 
-    public function getCost(Request $request)
-    {
-        $response = Http::withoutVerifying()
-            ->asForm() // <--- INI KUNCI UTAMANYA: Mengubah JSON menjadi Form Data
-            ->withHeaders([
-                'key' => env('RAJAONGKIR_API_KEY'),
-                'Accept' => 'application/json'
-            ])
-            ->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
-                'origin' => (int) $request->input('origin'),
-                'destination' => (int) $request->input('destination'),
-                'weight' => (int) $request->input('weight'),
-                'courier' => $request->input('courier'),
-            ]);
+        $curl = curl_init();
 
-        return response()->json(json_decode($response->body(), true));
-    }
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_HTTPHEADER => array(
+                'key: ' . env('RAJAONGKIR_API_KEY'),
+            ),
+        ));
 
-    public function getOngkir(Request $request)
-    {
-        $response = Http::withoutVerifying()
-            ->asForm()
-            ->withHeaders([
-                'key' => env('RAJAONGKIR_API_KEY'),
-                'Accept' => 'application/json'
-            ])
-            ->post('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', [
-                'origin' => (int) $request->input('origin'),
-                'destination' => (int) $request->input('destination'),
-                'weight' => (int) $request->input('weight'),
-                'courier' => $request->input('courier'),
-            ]);
+        $response = curl_exec($curl);
 
-        return response()->json(json_decode($response->body(), true));
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            return response()->json([
+                'error' => $err
+            ], 500);
+        }
+
+        return response()->json(
+            json_decode($response, true)
+        );
     }
 }
