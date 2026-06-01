@@ -275,10 +275,70 @@ class OrderController extends Controller
 
     public function complete()
     {
-        return redirect()->route('order.history')->with('success', 'Checkout berhasil');
+        // Ambil data customer berdasarkan user yang sedang login
+        $customer = Customer::where('user_id', Auth::id())->first();
+
+        if (!$customer) {
+            return redirect()
+                ->route('order.cart')
+                ->with('error', 'Data customer tidak ditemukan.');
+        }
+
+        // Cari order yang masih pending
+        $order = Order::where('customer_id', $customer->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if (!$order) {
+            return redirect()
+                ->route('order.cart')
+                ->with('error', 'Keranjang belanja kosong.');
+        }
+
+        // Format tanggal: yymmdd
+        $tanggal = date('ymd');
+
+        // Ambil nomor resi terakhir hari ini
+        $lastOrder = Order::whereDate('created_at', date('Y-m-d'))
+            ->whereNotNull('noresi')
+            ->orderBy('noresi', 'desc')
+            ->first();
+
+        if ($lastOrder) {
+            $lastNumber = intval(substr($lastOrder->noresi, -3));
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        // Format nomor urut menjadi 001, 002, dst.
+        $urut = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+
+        // Gabungkan menjadi nomor resi
+        $noresi = $tanggal . $urut;
+
+        // Kurangi stok produk
+        foreach ($order->orderItems as $item) {
+            $produk = Produk::find($item->produk_id);
+
+            if ($produk) {
+                $produk->stok -= $item->quantity;
+                $produk->save();
+            }
+        }
+
+        // Update status order
+        $order->status = 'Paid';
+        $order->noresi = $noresi;
+        $order->save();
+
+        return redirect()
+            ->route('order.history')
+            ->with(
+                'success',
+                'Checkout berhasil. Nomor resi Anda: ' . $noresi
+            );
     }
-    // Logika untuk halaman setelah pembayaran berhasil
-    // return view('v_order.complete');
 
 
 
@@ -414,7 +474,7 @@ class OrderController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://rajaongkir.komerce.id/api/v1/destination/domesticdestination?search=' . urlencode($search),
+            CURLOPT_URL => 'https://rajaongkir.komerce.id/api/v1/destination/domestic-destination?search=' . urlencode($search),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,

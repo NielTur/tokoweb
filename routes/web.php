@@ -11,7 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Models\Order;
 use Illuminate\Auth\Events\Logout;
 use App\Http\Controllers\RajaOngkirController;
-use App\Http\Controllers\Backend\PesananAdminController;
+// use App\Http\Controllers\PesananAdminController;
 
 Route::get('/', function () {
     // return view('welcome');
@@ -50,12 +50,12 @@ Route::get('backend/pesanan/detail/{id}', [OrderController::class, 'statusDetail
 Route::post('backend/pesanan/update/{id}', [OrderController::class, 'statusUpdate'])->name('pesanan.update')->middleware('auth');
 
 
-Route::group(['middleware' => 'auth'], function () {
-    // Route Admin untuk mengelola pesanan
-    Route::get('backend/pesanan', [PesananAdminController::class, 'index'])->name('backend.pesanan.index');
-    Route::get('backend/pesanan/{id}', [PesananAdminController::class, 'show'])->name('backend.pesanan.show');
-    Route::post('backend/pesanan/{id}/update-status', [PesananAdminController::class, 'updateStatus'])->name('backend.pesanan.updateStatus');
-});
+// Route::group(['middleware' => 'auth'], function () {
+//     // Route Admin untuk mengelola pesanan
+//     Route::get('backend/pesanan', [PesananAdminController::class, 'index'])->name('backend.pesanan.index');
+//     Route::get('backend/pesanan/{id}', [PesananAdminController::class, 'show'])->name('backend.pesanan.show');
+//     Route::post('backend/pesanan/{id}/update-status', [PesananAdminController::class, 'updateStatus'])->name('backend.pesanan.updateStatus');
+// });
 
 
 // Frontend
@@ -105,12 +105,14 @@ Route::get('/list-ongkir', function () {
     ])->get('https://rajaongkir.komerce.id/api/v1/destination/province'); //ganti 'province' atau 'city' 
     dd($response->json());
 });
+
+// cek onkir
 Route::get('/cek-ongkir', function () {
-    return view('ongkir');
+    return view('cek-ongkir');
 });
+
 Route::get('/ongkir/get-destination', [RajaOngkirController::class, 'getDestination']);
 Route::post('/ongkir/calculate', [RajaOngkirController::class, 'calculateOngkir']);
-
 
 
 // Ongkir
